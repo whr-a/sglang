@@ -394,6 +394,8 @@ class Engine(EngineScoreMixin, EngineBase):
         session_params: Optional[Dict] = None,
         priority: Optional[int] = None,
         session_id: Optional[str] = None,
+        # Native speech adapters can supply exact multimodal prompt embeddings.
+        input_embeds: Optional[Union[List[List[List[float]]], List[List[float]]]] = None,
     ) -> Union[Dict, Iterator[Dict]]:
         """
         The arguments of this function is the same as `sglang/srt/managers/io_struct.py::GenerateReqInput`.
@@ -406,6 +408,7 @@ class Engine(EngineScoreMixin, EngineBase):
         obj = GenerateReqInput(
             text=prompt,
             input_ids=input_ids,
+            input_embeds=input_embeds,
             sampling_params=sampling_params,
             image_data=image_data,
             audio_data=audio_data,
@@ -500,6 +503,8 @@ class Engine(EngineScoreMixin, EngineBase):
         session_params: Optional[Dict] = None,
         priority: Optional[int] = None,
         session_id: Optional[str] = None,
+        # Native speech adapters can supply exact multimodal prompt embeddings.
+        input_embeds: Optional[Union[List[List[List[float]]], List[List[float]]]] = None,
     ) -> Union[Dict, AsyncIterator[Dict]]:
         """
         The arguments of this function is the same as `sglang/srt/managers/io_struct.py::GenerateReqInput`.
@@ -512,6 +517,7 @@ class Engine(EngineScoreMixin, EngineBase):
         obj = GenerateReqInput(
             text=prompt,
             input_ids=input_ids,
+            input_embeds=input_embeds,
             sampling_params=sampling_params,
             image_data=image_data,
             audio_data=audio_data,
