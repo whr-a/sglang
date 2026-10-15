@@ -1,0 +1,26 @@
+{
+  "base_commit": "4c3f163fe54634f20ef846e1ec0c507b27ae2430",
+  "upstream_repository": "https://github.com/sgl-project/sglang",
+  "upstream_commit": "4076a68579b4a7ae3e9d2ce2f94dec9917237bab",
+  "sources": [
+    {
+      "path": "python/sglang/srt/entrypoints/openai/encoding_dsv41.py",
+      "url": "https://raw.githubusercontent.com/sgl-project/sglang/4076a68579b4a7ae3e9d2ce2f94dec9917237bab/python/sglang/srt/entrypoints/openai/encoding_dsv41.py",
+      "sha256": "9c29c810c440589f2456df36ecf754a5083244f5d5887c64d6735f32b538ea4c",
+      "scope": "Unmodified complete upstream file."
+    },
+    {
+      "path": "python/sglang/srt/entrypoints/openai/chat_encoding.py",
+      "url": "https://raw.githubusercontent.com/sgl-project/sglang/4076a68579b4a7ae3e9d2ce2f94dec9917237bab/python/sglang/srt/entrypoints/openai/chat_encoding.py",
+      "sha256": "940b41c09a7a604a513a6422007e6d364f6b14b3fc26aa7e076a20442783dfe3",
+      "scope": "Only parse_dsv41_reasoning_effort, dsv41_tool_payload, default_dsv41_reasoning_effort_from_env, their field-order constant and required imports. Existing functions are unchanged."
+    }
+  ],
+  "purpose": "Provide the real encoder API imported by pinned Miles a22fd824 without changing the reviewed torch 2.11 SGLang profile.",
+  "limits": [
+    "This does not enable DeepSeek V4.1 serving dispatch, tool/reasoning parsers, or model support.",
+    "This does not claim full compatibility with current upstream SGLang or optional Miles weight-transfer protocols.",
+    "Full Miles imports and native ESPnet GPU execution require separate environment and integration acceptance."
+  ],
+  "test_command": "SGLANG_V41_REFERENCE_DIR=<verified-source-directory> PYTHONDONTWRITEBYTECODE=1 CUDA_VISIBLE_DEVICES='' PYTHONPATH=python python -B test/registered/unit/entrypoints/openai/test_miles_v41_compat.py -v"
+}

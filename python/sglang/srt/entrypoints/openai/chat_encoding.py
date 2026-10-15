@@ -10,9 +10,9 @@ from __future__ import annotations
 import ast
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
-from sglang.srt.entrypoints.openai import encoding_dsv4
+from sglang.srt.entrypoints.openai import encoding_dsv4, encoding_dsv41
 
 logger = logging.getLogger(__name__)
 
@@ -194,3 +194,53 @@ def encode_simple_chat(
     return tokenizer.apply_chat_template(
         messages, add_generation_prompt=True, tokenize=True
     )
+
+
+def parse_dsv41_reasoning_effort(value: Any) -> Union[str, int, None]:
+    """Map an API ``reasoning_effort`` onto what the V4.1 encoder accepts.
+
+    An int budget only reaches here through ``chat_template_kwargs``; None
+    means unsupported, and the caller applies its default.
+    """
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        return value if 1 <= value <= 100 else None
+    if isinstance(value, float):
+        return max(1, round(value * 100)) if 0.0 <= value <= 0.99 else None
+    if value in encoding_dsv41.REASONING_EFFORT_MAPPINGS:
+        return value
+    return None
+
+
+_OPENAI_FUNCTION_FIELD_ORDER = ("name", "description", "parameters")
+
+
+def dsv41_tool_payload(tool: Any) -> Dict[str, Any]:
+    """The tool dict the V4.1 encoder renders verbatim into the prompt.
+
+    Only fields the client sent, in the OpenAI field order; pydantic would
+    otherwise add defaults (strict=false) and reorder keys by declaration.
+    """
+    payload = tool.model_dump(exclude_unset=True, exclude_none=True)
+    function = dict(payload.get("function") or {})
+    ordered = {
+        k: function.pop(k) for k in _OPENAI_FUNCTION_FIELD_ORDER if k in function
+    }
+    ordered.update(function)
+    payload["function"] = ordered
+    return payload
+
+
+def default_dsv41_reasoning_effort_from_env(raw: Optional[str]) -> Union[str, int]:
+    """Parse ``SGLANG_DSV41_REASONING_EFFORT``; raises so a bad value fails at boot."""
+    if raw is None or not raw.strip():
+        return encoding_dsv41.DEFAULT_REASONING_EFFORT
+    value: Any = int(raw) if raw.strip().isdigit() else raw.strip()
+    effort = parse_dsv41_reasoning_effort(value)
+    if effort is None:
+        raise ValueError(
+            f"Invalid SGLANG_DSV41_REASONING_EFFORT={raw!r}; expected one of "
+            f"{list(encoding_dsv41.REASONING_EFFORT_MAPPINGS)} or an integer in [1, 100]"
+        )
+    return effort
